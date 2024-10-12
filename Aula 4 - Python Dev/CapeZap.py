@@ -22,9 +22,17 @@ import flet as ft
 from datetime import datetime
 
 # criar uma função principal para roda o seu aplicativo
-def main(pagina):
+def main(pagina: ft.Page):
     # titulo
     titulo = ft.Text("CapeZap")
+
+    def enviar_mensagem_tunel(mensagem):
+        # executar para todos usuários
+        texto = ft.Text(mensagem)
+        chat.controls.append(texto)
+        pagina.update()
+
+    pagina.pubsub.subscribe(enviar_mensagem_tunel)
 
     def enviar_mensagem(evento):
         #pega a mensagem digitada
@@ -32,10 +40,9 @@ def main(pagina):
         data_e_hora_em_texto = data_e_hora_atuais.strftime("%d/%m/%Y %H:%M")
         nome_usuario = caixa_nome.value
         texto_campo_mensagem = campo_enviar_mensagem.value
-        texto = ft.Text(f"{data_e_hora_em_texto} - {nome_usuario}: {texto_campo_mensagem}")
-
-        # adiciona a mensagem a tela
-        chat.controls.append(texto)
+        mensagem = f"{data_e_hora_em_texto} - {nome_usuario}: {texto_campo_mensagem}"
+        pagina.pubsub.send_all(mensagem)
+        
         # limpar a caixa de enviar mensagem
         campo_enviar_mensagem.value = ""
         # atualizaq a pagina
@@ -72,9 +79,8 @@ def main(pagina):
 
         # adicion ar no chat a mensagem "(nome do usuário) entrou no chat"
         nome_usuario = caixa_nome.value
-        texto_mensagem = ft.Text(f"{nome_usuario} entrou no chat")
-        chat.controls.append(texto_mensagem)
-
+        mensagem = f"{nome_usuario} entrou no chat"
+        pagina.pubsub.send_all(mensagem)
         # Atualizar a tela 
         pagina.update()
 
@@ -102,4 +108,6 @@ def main(pagina):
     pagina.add(botao)
 
 # executar essa função com o flet
-ft.app(main)
+ft.app(target=main, view=ft.AppView.WEB_BROWSER)
+
+#Falta fazer deploy num servidor - pesquisar: flet deploy no google.
